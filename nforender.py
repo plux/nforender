@@ -14,14 +14,16 @@ from sys import argv, stdout
 from getopt import getopt
 
 def load_bitmap_font(filename, dimensions):
+    cols, rows = dimensions
     im = Image.open(filename)
-    char_width = im.size[0]/dimensions[0]
-    char_height = im.size[1]/dimensions[1]
+    width, height = im.size
+    char_width = width/cols
+    char_height = height/rows
 
     font = []
-    for n in range(dimensions[0]*dimensions[1]):
-        offsetx = (n%dimensions[0])*char_width
-        offsety = (n/dimensions[0])*char_height
+    for n in range(cols*rows):
+        offsetx = (n%cols)*char_width
+        offsety = (n/cols)*char_height
         crop = im.crop((offsetx, 
                         offsety, 
                         offsetx+char_width,
@@ -55,14 +57,12 @@ def render_nfo(filename, font):
         x = 0
         for c in line.rstrip():
             x += char_width
-            if c == '\t':
+            if c == '\t': # dont render anything is tab character
                 continue
             char = font[ord(c)]
             image.paste(char, (x,y))            
     
     return image
-
-
 
 BACKGROUND_COLOR = (0,0,0)
 FOREGROUND_COLOR = (168,168,168)
@@ -94,8 +94,6 @@ Options:
 """
     exit()
 
-
-
 def main(args):
     try:
         optlist, args = getopt(args, 'ho:b:f:s:d', ["help", "output=", "background=", "foreground=", "style=","display"])
@@ -109,7 +107,6 @@ def main(args):
         print "Error: You must give one file as argument."
         usage()
  
-
     font_styles = {"courier": ("courier.png", (32, 8)), 
                    "dos": ("dos.png", (32, 8))}
     
@@ -157,12 +154,8 @@ def main(args):
         print err
         exit()
 
-
     if not (fg == FOREGROUND_COLOR and bg == BACKGROUND_COLOR):
-        print "FRAPP"
         set_colors(im, fg, bg)
-    else:
-        print "FROPP"
 
     if display:
         im.show()
@@ -175,7 +168,6 @@ def main(args):
         else:
             im.save(output, "PNG")
         
-
 if __name__ == "__main__":
     main(argv[1:])
 
