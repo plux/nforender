@@ -1,0 +1,7 @@
+# emacs pollution
+\#*
+.\#*
+*~
+
+# compiled python
+*.pyc
