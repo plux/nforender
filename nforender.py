@@ -8,7 +8,7 @@ Renders NFO-files to PNG.
 
 Can be used both as a library and as a standalone tool.
 """
-
+from __future__ import with_statement
 from PIL import Image, ImageColor
 from sys import argv, stdout
 from getopt import getopt
@@ -17,30 +17,32 @@ def load_bitmap_font(filename, dimensions):
     cols, rows = dimensions
     im = Image.open(filename)
     width, height = im.size
-    char_width = width/cols
-    char_height = height/rows
+    char_width = width / cols
+    char_height = height / rows
 
     font = []
-    for n in range(cols*rows):
-        offsetx = (n%cols)*char_width
-        offsety = (n/cols)*char_height
+    for n in range(cols * rows):
+        offsetx = (n%cols) * char_width
+        offsety = (n/cols) * char_height
         crop = im.crop((offsetx, 
                         offsety, 
-                        offsetx+char_width,
-                        offsety+char_height))
+                        offsetx + char_width,
+                        offsety + char_height))
         font.append(crop)
+
     return font
 
 
 def load_nfo(filename):
-    nfo = open(filename).readlines()
-    width = 0
-    for line in nfo:
-        line = line.rstrip()
-        width = max(len(line), width)
+    with open(filename) as f:
+        nfo = f.readlines()
+        width = 0
+        for line in nfo:
+            line = line.rstrip()
+            width = max(len(line), width)
 
-    height = len(nfo)
-    return (nfo, width, height)
+        height = len(nfo)
+        return (nfo, width, height)
 
 def render_nfo(filename, font):
     nfo, width, height = load_nfo(filename)
@@ -65,7 +67,7 @@ def render_nfo(filename, font):
     return image
 
 BACKGROUND_COLOR = (0,0,0)
-FOREGROUND_COLOR = (168,168,168)
+FOREGROUND_COLOR = (168 168,168)
 def set_colors(im, fg, bg):
     buf = im.load()
     width, height = im.size
@@ -81,7 +83,7 @@ def usage():
     print """
 Usage: nforender.py [OPTION] FILE
 
-Renders a NFO-file to PNG. Default it to output file to FILE.png
+Renders a NFO-file to PNG. Default is to output to FILE.png
 
 Options:
 
@@ -96,9 +98,11 @@ Options:
 
 def main(args):
     try:
-        optlist, args = getopt(args, 'ho:b:f:s:d', ["help", "output=", "background=", "foreground=", "style=","display"])
+        optlist, args = getopt(args, 'ho:b:f:s:d', 
+                               ["help", "output=", "background=", 
+                                "foreground=", "style=", "display"])
     except getopt.GetoptError, err:
-        print "Error", str(err)
+        print "Error:", str(err)
         usage()
 
     try:
@@ -107,9 +111,6 @@ def main(args):
         print "Error: You must give one file as argument."
         usage()
  
-    font_styles = {"courier": ("courier.png", (32, 8)), 
-                   "dos": ("dos.png", (32, 8))}
-    
     # Defaults
     output = nfo_filename + ".png"
     display = False
@@ -121,7 +122,6 @@ def main(args):
     for opt, arg in optlist:
         if opt in ("-h", "--help"):
             usage()
-
         elif opt in ("-o", "--output"):
             output = arg
         elif opt in ("-b", "--background"):
@@ -140,12 +140,13 @@ def main(args):
             try:
                 font_style = font_styles[arg]
             except:
-                print "Error: Not a valid style. Valid values:", ", ".join(font_styles.keys())
+                print "Error: Not a valid style. Valid values:", 
+                print ", ".join(font_styles.keys())
                 usage()
         elif opt in ("-d", "--display"):
             display = True
         else:
-             assert False, "unhandled option"
+            assert False, "unhandled option"
     
     try:
         font = load_bitmap_font(*font_style)        
@@ -154,9 +155,10 @@ def main(args):
         print err
         exit()
 
+    # Only replace colors if necessary
     if not (fg == FOREGROUND_COLOR and bg == BACKGROUND_COLOR):
         set_colors(im, fg, bg)
-
+    
     if display:
         im.show()
     else:
