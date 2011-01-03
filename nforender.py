@@ -62,12 +62,11 @@ def render_nfo(filename, font):
             if c == '\t': # dont render anything is tab character
                 continue
             char = font[ord(c)]
-            image.paste(char, (x,y))            
-    
+            image.paste(char, (x,y))
     return image
 
 BACKGROUND_COLOR = (0,0,0)
-FOREGROUND_COLOR = (168 168,168)
+FOREGROUND_COLOR = (168,168,168)
 def set_colors(im, fg, bg):
     buf = im.load()
     width, height = im.size
