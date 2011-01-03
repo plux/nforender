@@ -24,8 +24,8 @@ def load_bitmap_font(filename, dimensions):
     for n in range(cols * rows):
         offsetx = (n%cols) * char_width
         offsety = (n/cols) * char_height
-        crop = im.crop((offsetx, 
-                        offsety, 
+        crop = im.crop((offsetx,
+                        offsety,
                         offsetx + char_width,
                         offsety + char_height))
         font.append(crop)
@@ -77,7 +77,7 @@ def set_colors(im, fg, bg):
             if c == BACKGROUND_COLOR:
                 buf[x,y] = bg
             elif c == FOREGROUND_COLOR:
-                buf[x,y] = fg                
+                buf[x,y] = fg
 
 def usage():
     print """
@@ -98,19 +98,21 @@ Options:
 
 def main(args):
     try:
-        optlist, args = getopt(args, 'ho:b:f:s:d', 
-                               ["help", "output=", "background=", 
+        optlist, args = getopt(args, 'ho:b:f:s:d',
+                               ["help", "output=", "background=",
                                 "foreground=", "style=", "display"])
     except getopt.GetoptError, err:
         print "Error:", str(err)
         usage()
-
     try:
-        nfo_filename = args[0]                
+        nfo_filename = args[0]
     except:
         print "Error: You must give one file as argument."
         usage()
- 
+
+    font_styles = {"dos":     ("dos.png",     (32, 8)),
+                   "courier": ("courier.png", (32, 8))}
+
     # Defaults
     output = nfo_filename + ".png"
     display = False
@@ -140,16 +142,16 @@ def main(args):
             try:
                 font_style = font_styles[arg]
             except:
-                print "Error: Not a valid style. Valid values:", 
+                print "Error: Not a valid style. Valid values:",
                 print ", ".join(font_styles.keys())
                 usage()
         elif opt in ("-d", "--display"):
             display = True
         else:
             assert False, "unhandled option"
-    
+
     try:
-        font = load_bitmap_font(*font_style)        
+        font = load_bitmap_font(*font_style)
         im = render_nfo(nfo_filename, font)
     except Exception, err:
         print err
@@ -158,7 +160,7 @@ def main(args):
     # Only replace colors if necessary
     if not (fg == FOREGROUND_COLOR and bg == BACKGROUND_COLOR):
         set_colors(im, fg, bg)
-    
+
     if display:
         im.show()
     else:
@@ -166,10 +168,10 @@ def main(args):
             im.save(stdout,"PNG")
         elif output == nfo_filename:
             print "Error: Output and input shouldn't be the same file"
-            usage()            
+            usage()
         else:
             im.save(output, "PNG")
-        
+
 if __name__ == "__main__":
     main(argv[1:])
 
